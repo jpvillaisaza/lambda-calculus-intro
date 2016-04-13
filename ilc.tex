@@ -1,0 +1,481 @@
+\documentclass{beamer}
+
+\usetheme{default}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{polyglossia}
+
+\setdefaultlanguage[variant=usmax]{english}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\usepackage{fancyvrb}
+\usepackage{relsize}
+
+\DefineShortVerb{\|}
+\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\relsize{-1},frame=lines}
+
+\DeclareMathOperator{\fv}{FV}
+
+\newcommand{\contract}{\ensuremath{\triangleright_{1\beta}}}
+\newcommand{\contracts}[2]{\ensuremath{{#1}\,\contract\,{#2}}}
+\newcommand{\reduce}{\ensuremath{\triangleright_{\beta}}}
+\newcommand{\reduces}[2]{\ensuremath{{#1}\,\reduce\,{#2}}}
+
+\title{Introduction to $\lambda$-calculus}
+\date{April 13, 2016}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{\titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=0pt,minimum size=1mm}]
+      \node [circle,draw,fill] (1920) at (3.00,7.00) [label=left:1920] {};
+      \node [circle,draw,fill] (1930) at (3.00,6.00) [label=left:1930] {};
+      \node [circle,draw,fill] (1940) at (3.00,5.00) [label=left:1940] {};
+      \node [circle,draw,fill] (1950) at (3.00,4.00) [label=left:1950] {};
+      \node [circle,draw,fill] (1960) at (3.00,3.00) [label=left:1960] {};
+      \node [circle,draw,fill] (1970) at (3.00,2.00) [label=left:1970] {};
+      \node [circle,draw,fill] (1980) at (3.00,1.00) [label=left:1980] {};
+      \node [circle,draw,fill] (1990) at (3.00,0.00) [label=left:1990] {};
+
+      \node at (0.00,6.50) {Combinatory logic};
+      \node at (0.00,5.75) {$\lambda$-calculus};
+      \node at (0.00,5.25) {(Turing machines)};
+      \node at (0.00,3.00) {Lisp};
+      \node at (0.00,0.00) {Haskell};
+
+      \node at (6.00,7.00) {Moses Schönfinkel};
+      \node at (6.00,6.50) {Haskell Curry};
+      \node at (6.00,5.75) {Alonzo Church};
+      \node at (6.00,5.25) {(Alan Turing)};
+      \node at (6.00,3.00) {John McCarthy};
+      \node at (6.00,2.50) {Dana Scott};
+      \node at (6.00,2.00) {Henk Barendregt};
+
+      \draw [-] (1920) to (1990);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{quote}
+    $\lambda$-calculus and combinatory logic are rather like the
+    chassis of a bus, which gives the bus essential support but is
+    definitely not the whole bus. Just as the chassis gains its
+    purpose from the purpose to which the whole bus is put, so
+    $\lambda$-calculus and combinatory logic gain their main purpose
+    as parts of other systems of higher-order logic and programming.
+  \end{quote}
+  \hfill ---Hindley and Seldin
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{definition}[$\lambda$-term]
+    \begin{itemize}
+    \item
+      Atom
+      \begin{itemize}
+      \item
+        Variable: $x$, $y$, $z$, $\dots$
+      \item
+        Atomic constant
+      \end{itemize}
+    \item
+      Application: $MN$
+    \item
+      Abstraction: $\lambda{x}.M$
+    \end{itemize}
+  \end{definition}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{examples}[$\lambda$-terms]
+    \begin{enumerate}
+    \item
+      $\lambda{x}.xy$
+    \item
+      $(\lambda{y}.y)(\lambda{x}.xy)$
+    \item
+      $x\,(\lambda{x}.(\lambda{x}.x))$
+    \item
+      $\lambda{x}.yz$
+    \end{enumerate}
+  \end{examples}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{block}{Notation ($\lambda$-term)}
+    \begin{itemize}
+    \item
+      $\lambda$-terms: $M$, $N$, $P$, $\dots$
+    \item
+      Variables: $x$, $y$, $z$, $\dots$
+    \end{itemize}
+    \begin{itemize}
+    \item
+      $MNPQ \equiv (((MN)P)Q)$
+    \item
+      $\lambda{x_{1}x_{2}\dots x_{n}}.M \equiv
+      \lambda{x_{1}}.\lambda{x_{2}}.\dots\lambda{x_{n}}.M$
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{block}{Informal interpretation ($\lambda$-term)}
+    \begin{itemize}
+    \item
+      Function application: $MN$ \hfill ($\equiv M(N)$)
+    \item
+      Function: $\lambda{x}.M$
+      \begin{itemize}
+      \item
+        $(\lambda{x}.M)N \equiv [N/x]M$
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{examples}[Informal interpretation ($\lambda$-term)]
+    \begin{itemize}
+    \item
+      $\lambda{x}.x(xy)$
+      \begin{itemize}
+      \item
+        $(\lambda{x}.x(xy))N \equiv N(Ny)$
+      \end{itemize}
+    \item
+      $\lambda{x}.y$
+      \begin{itemize}
+      \item
+        $(\lambda{x}.y)N \equiv y$
+      \end{itemize}
+    \end{itemize}
+  \end{examples}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{definition}[Free and bound variables]
+    \begin{itemize}
+    \item
+      Bound: $((xv)(\lambda{yz}.\underline{y}v))w$
+    \item
+      Bound and binding: $((xv)(\lambda{\underline{yz}}.yv))w$
+    \item
+      Free:
+      $((\underline{xv})(\lambda{yz}.y\underline{v}))\underline{w}$
+    \end{itemize}
+  \end{definition}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{example}[Free and bound variables]
+    \begin{itemize}
+    \item
+      $P \equiv
+      (\lambda{y}.y\underline{x}(\lambda{x}.y(\lambda{y}.\underline{z})x))\underline{vw}$
+      \begin{itemize}
+      \item
+        $\fv(P) = \{x, z, v, w\}$
+      \end{itemize}
+    \end{itemize}
+  \end{example}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{definition}[Closed term]
+    \begin{itemize}
+    \item
+      A term without any free variables: $\fv(P) = \emptyset$
+    \end{itemize}
+  \end{definition}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{definition}[Substitution]
+    \begin{itemize}
+    \item
+      $[N/x]M$ is the result of substituting $N$ for every free
+      occurrence of $x$ in $M$, and changing bound variables to avoid
+      clashes.
+    \end{itemize}
+  \end{definition}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{examples}[Substitution]
+    \begin{itemize}
+    \item
+      $[w/x](\lambda{y}.x) \equiv \lambda{y}.w$
+    \item
+      $[w/x](\lambda{w}.x) \equiv \lambda{z}.w$ \hfill ($\not\equiv
+      \lambda{w}.w$)
+    \end{itemize}
+  \end{examples}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{definition}[$\beta$-contracting, $\beta$-reducing]
+    \begin{align*}
+      \underbrace{(\lambda{x}.M)N}_{\beta\text{-redex}}
+      &\underbrace{\contract}_{\beta\text{-contracts}}
+      \underbrace{[N/x]M}_{\phantom{\beta}\text{contractum}}\\ {}\\ P\,&\underbrace{\contract
+        \dots \contract}_{\underbrace{\reduce}_{\beta\text{-reduces}}}
+      \, Q
+    \end{align*}
+  \end{definition}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{examples}[$\beta$-contracting, $\beta$-reducing]
+    \begin{itemize}
+    \item
+      $\contracts{(\lambda{x}.x(xy))N}{N(Ny)}$
+    \item
+      $\contracts{(\lambda{x}.y)N}{y}$
+    \end{itemize}
+  \end{examples}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{example}[$\beta$-contracting, $\beta$-reducing]
+    \begin{align*}
+      (\lambda{x}.(\lambda{y}.yx)z)v
+      &\quad\contract\phantom{\equiv} [v/x]((\lambda{y}.yx)z)\\
+      &\quad\equiv\phantom{\contract} (\lambda{y}.yv)z\\
+      &\quad\contract\phantom{\equiv} [z/y](yv)\\
+      &\quad\equiv\phantom{\contract} zv
+    \end{align*}
+  \end{example}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{example}[$\beta$-contracting, $\beta$-reducing]
+    \begin{align*}
+      \Omega \equiv (\lambda{x}.xx)(\lambda{x}.xx)
+      &\quad\contract\quad (\lambda{x}.xx)(\lambda{x}.xx)\\
+      &\quad\contract\quad (\lambda{x}.xx)(\lambda{x}.xx)\\
+      &\quad\dots
+    \end{align*}
+  \end{example}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{example}[$\beta$-contracting, $\beta$-reducing]
+    \begin{align*}
+      (\lambda{x}.xxy)(\lambda{x}.xxy)
+      &\quad\contract\quad (\lambda{x}.xxy)(\lambda{x}.xxy)y\\
+      &\quad\contract\quad (\lambda{x}.xxy)(\lambda{x}.xxy)yy\\
+      &\quad\dots
+    \end{align*}
+  \end{example}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{definition}[$\beta$-normal form]
+    \begin{itemize}
+    \item
+      A term $Q$ which contains no $\beta$-redexes.
+    \end{itemize}
+  \end{definition}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{example}[$\beta$-normal form]
+    \begin{itemize}
+    \item
+      $zv$ is a $\beta$-normal form of $(\lambda{x}.(\lambda{y}.yx)z)v$.
+    \end{itemize}
+  \end{example}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{examples}
+    \begin{itemize}
+    \item
+      $L \equiv (\lambda{x}.xxy)(\lambda{x}.xxy)$
+      \begin{itemize}
+      \item
+        $L \,\contract\, Ly \,\contract\, Lyy \,\contract \,\dots$
+      \end{itemize}
+    \item
+      Let $P \equiv (\lambda{u}.v)L$:
+      \begin{itemize}
+      \item
+        $P \,\contract\, [L/u]v \equiv v$
+      \item
+        $P \,\contract\, (\lambda{u}.v)(Ly) \,\contract\,
+        (\lambda{u}.v)(Lyy) \,\contract\, \dots$
+      \end{itemize}
+    \end{itemize}
+  \end{examples}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{examples}[$\beta$-normal form]
+    \begin{itemize}
+    \item
+      $\Omega \equiv (\lambda{x}.xx)(\lambda{x}.xx)$
+    \item
+      $T \equiv (\lambda{u}.v)\Omega$
+    \end{itemize}
+  \end{examples}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{example}[$\beta$-normal form]
+    \begin{align*}
+      (\lambda{x}.(\lambda{y}.yx)z)v
+      &\quad\contract\quad (\lambda{y}.yv)z\\
+      &\quad\contract\quad zv\\
+      (\lambda{x}.(\lambda{y}.yx)z)v
+      &\quad\contract\quad (\lambda{z}.zx)v\\
+      &\quad\contract\quad zv
+    \end{align*}
+  \end{example}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+  \begin{theorem}[Church-Rosser theorem for \reduce]
+    \begin{center}
+      \begin{tikzpicture}[
+          node distance=3cm,
+          every node/.style={
+            draw,
+            circle,
+            inner sep=0pt,
+            minimum size=1.5mm
+          }
+        ]
+
+        \node [fill] (P)                    [label=$P$]                {};
+        \node [fill] (M) [below left of=P]  [label=left:$M$]           {};
+        \node [fill] (N) [below right of=P] [label=right:$N$]          {};
+        \node        (T) [below right of=M] [label=below:$\exists{T}$] {};
+
+        \draw [->]        (P) to (M);
+        \draw [->]        (P) to (N);
+        \draw [->,dashed] (M) to (T);
+        \draw [->,dashed] (N) to (T);
+      \end{tikzpicture}
+    \end{center}
+  \end{theorem}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]
+
+  \begin{example}[\texttt{Core}]
+  \begin{code}
+type CoreExpr = Expr Var
+
+data Expr b
+  = Var   Id
+  | Lit   Literal
+  | App   (Expr b) (Arg b)
+  | Lam   b (Expr b)
+  | Let   (Bind b) (Expr b)
+  | Case  (Expr b) b Type [Alt b]
+  | Cast  (Expr b) Coercion
+  | Tick  (Tickish Id) (Expr b)
+  | Type  Type
+  | Coercion Coercion
+  \end{code}
+  \end{example}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+  \frametitle{Bibliography}
+
+  \begin{thebibliography}{}
+  \setbeamertemplate{bibliography item}[book]
+  \bibitem{}
+    Hindley and Seldin (2008).
+    \newblock \emph{Lambda-Calculus and Combinators: An Introduction}.
+    \newblock Cambridge.
+  \end{thebibliography}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
